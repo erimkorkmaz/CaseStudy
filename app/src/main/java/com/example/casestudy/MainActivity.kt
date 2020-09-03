@@ -20,7 +20,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         retrieveData()
-        initView()
+        initProductView()
+        initSocialView()
         setTimer()
     }
 
@@ -31,10 +32,15 @@ class MainActivity : AppCompatActivity() {
         social = gson.fromJson(jsonSocial, Social::class.java)
     }
 
-    private fun initView() {
+    private fun initProductView() {
         Glide.with(applicationContext).load(product.image).into(image_product)
         text_product_name.text = product.name
         text_product_type.text = product.desc
+        text_price.text =
+            getString(R.string.price, product.price.value.toString(), product.price.currency)
+    }
+
+    private fun initSocialView() {
         text_like.text = social.likeCount.toString()
         text_rating.text = social.commentCounts.averageRating.toString()
         rating_bar.rating = social.commentCounts.averageRating.toFloat()
@@ -42,15 +48,13 @@ class MainActivity : AppCompatActivity() {
             R.string.comments_count,
             (social.commentCounts.anonymousCommentsCount + social.commentCounts.memberCommentsCount).toString()
         )
-        text_price.text =
-            getString(R.string.price, product.price.value.toString(), product.price.currency)
     }
 
     private fun setTimer() {
         timer = object : CountDownTimer(20000, 1000) {
             override fun onFinish() {
                 retrieveData()
-                initView()
+                initSocialView()
                 timer?.start()
             }
 
@@ -59,4 +63,8 @@ class MainActivity : AppCompatActivity() {
         }.start()
     }
 
+    override fun onDestroy() {
+        timer?.cancel()
+        super.onDestroy()
+    }
 }
